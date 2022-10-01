@@ -319,7 +319,7 @@ int main()
     printf("average runtime kij opt %lf seconds\n", average_runtime);
     printf("---------------------------------\n");
 
-// kij ordering naive optimization (useless for -O3)
+// ikj ordering optimization
     average_runtime = 0.0;
     for(int n=0; n<NRuns; n++)
     {
@@ -330,7 +330,7 @@ int main()
     printf("average runtime kij opt MY %lf seconds\n", average_runtime);
     printf("---------------------------------\n");
 
-// kij ordering naive optimization (useless for -O3)
+// ij ordering optimization
     average_runtime = 0.0;
     for(int n=0; n<NRuns; n++)
     {
