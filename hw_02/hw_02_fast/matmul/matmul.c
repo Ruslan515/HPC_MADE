@@ -1,10 +1,8 @@
-// gcc matmul.c -o best -fPIC -O3 -march=haswell
+#include "matmul.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
 #include <immintrin.h>
-
-const size_t N = 1024;
 
 void ZeroMatrix(double * A, size_t N)
 {
@@ -28,6 +26,36 @@ void RandomMatrix(double * A, size_t N)
             A[i * N + j] = rand() / RAND_MAX;
         }
     }
+}
+
+void RandomVector(double * A, size_t N)
+{
+    srand(time(NULL));
+
+    for (int i = 0; i < N; i++)
+        A[i] = rand() / RAND_MAX;
+}
+
+double CalcMatMulTime_vector(double * A, double * V, double * C, size_t N)
+{
+    struct timeval start, end;
+    double r_time = 0.0;
+    size_t i, j;
+
+    ZeroMatrix(&C[0], N);
+
+    gettimeofday(&start, NULL);
+    
+        for(i = 0; i < N; i++)
+        {
+            for(j = 0; j < N; j++)
+                C[i * N + j] += A[i * N + j] * V[j];
+        }
+    gettimeofday(&end, NULL);
+    
+    r_time = end.tv_sec - start.tv_sec + ((double) (end.tv_usec - start.tv_usec)) / 1000000;
+    
+    return r_time;
 }
 
 double CalcMatMulTime_ijk(double * A, double * B, double * C, size_t N)
@@ -193,7 +221,7 @@ void micro_6x16(int K, const float * A, int lda, int step,
     _mm256_storeu_ps(C + 8, _mm256_add_ps(c51, _mm256_loadu_ps(C + 8)));
 }
 
-void init_c(int M, int N, float * C, int ldc)
+void init_c(int M, int N, double * C, int ldc)
 {
     for (int i = 0; i < M; ++i, C += ldc)
         for (int j = 0; j < N; j += 8)
@@ -255,96 +283,124 @@ double CalcMatMulTime_ikj_opt_MY_01(double * A, double * B, double * C, size_t N
 
 }
 
-int main()
-{
+void calc_time_matmul(){
     
     int NRuns = 5;
     size_t i, j, k;
 
     double *runtimes;
-    double *A, *B, *C;
-    
+    double *A, *B, *C, *V;
+
+    int N = 512;
     A = (double *) malloc(N * N * sizeof(double));
-    B = (double *) malloc(N * N * sizeof(double));
     C = (double *) malloc(N * N * sizeof(double));
+    V = (double *) malloc(N * sizeof(double));
     runtimes = (double *) malloc(NRuns * sizeof(double));
 
-    RandomMatrix(&A[0], N);
-    RandomMatrix(&B[0], N);
 
-// ijk ordering
+// vector multiply
+    RandomMatrix(&A[0], N);
+    RandomVector(&V[0], N);
     double average_runtime = 0.0;
     for(int n=0; n<NRuns; n++)
     {
-        runtimes[n]=CalcMatMulTime_ijk(&A[0], &B[0], &C[0], N);
+        runtimes[n]=CalcMatMulTime_vector(&A[0], &V[0], &C[0], N);
         printf("runtime %lf seconds\n", runtimes[n]);
         average_runtime += runtimes[n]/NRuns;
     }
-
-    printf("average runtime ijk %lf seconds\n", average_runtime);
+    printf("average runtime of %d-sized mtr X vector is %lf seconds\n", N, average_runtime);
     printf("---------------------------------\n");
+    free(V);
 
-
-// jik ordering
-    average_runtime = 0.0;
-    for(int n=0; n<NRuns; n++)
-    {
-        runtimes[n]=CalcMatMulTime_jik(&A[0], &B[0], &C[0], N);
-        printf("runtime %lf seconds\n", runtimes[n]);
-        average_runtime += runtimes[n]/NRuns;
-    }
-
-    printf("average runtime jik %lf seconds\n", average_runtime);
-    printf("---------------------------------\n");
+    int sizes_to_try[] = {500, 512, 1000, 1024, 2000, 2048};    
+    int count_all = 6;
     
+    for (int i = 0; i < count_all; i++) {
+        N = sizes_to_try[i];
+        printf("\n\t\t\t=============\tSize %d \t=============\n\n", N);
+        A = (double *) malloc(N * N * sizeof(double));
+        B = (double *) malloc(N * N * sizeof(double));
+        C = (double *) malloc(N * N * sizeof(double));
+        runtimes = (double *) malloc(NRuns * sizeof(double));
 
-// kij ordering
-    average_runtime = 0.0;
-    for(int n=0; n<NRuns; n++)
-    {
-        runtimes[n]=CalcMatMulTime_kij(&A[0], &B[0], &C[0], N);
-        printf("runtime %lf seconds\n", runtimes[n]);
-        average_runtime += runtimes[n]/NRuns;
-    }
-    printf("average runtime kij %lf seconds\n", average_runtime);
-    printf("---------------------------------\n");
-    
-// kij ordering naive optimization (useless for -O3)
-    average_runtime = 0.0;
-    for(int n=0; n<NRuns; n++)
-    {
-        runtimes[n]=CalcMatMulTime_kij_opt(&A[0], &B[0], &C[0], N);
-        printf("runtime %lf seconds\n", runtimes[n]);
-        average_runtime += runtimes[n]/NRuns;
-    }
-    printf("average runtime kij opt %lf seconds\n", average_runtime);
-    printf("---------------------------------\n");
+        RandomMatrix(&A[0], N);
+        RandomMatrix(&B[0], N);
 
-// ikj ordering optimization
-    average_runtime = 0.0;
-    for(int n=0; n<NRuns; n++)
-    {
-        runtimes[n]=CalcMatMulTime_ikj_opt_MY_01(&A[0], &B[0], &C[0], N);
-        printf("runtime %lf seconds\n", runtimes[n]);
-        average_runtime += runtimes[n]/NRuns;
-    }
-    printf("average runtime ikj ordering MY %lf seconds\n", average_runtime);
-    printf("---------------------------------\n");
+        // ijk ordering
+        double average_runtime = 0.0;
+        for(int n = 0; n < NRuns; n++)
+        {
+            runtimes[n]=CalcMatMulTime_ijk(&A[0], &B[0], &C[0], N);
+            printf("runtime %lf seconds\n", runtimes[n]);
+            average_runtime += runtimes[n]/NRuns;
+        }
 
-// ij ordering optimization
-    average_runtime = 0.0;
-    for(int n=0; n<NRuns; n++)
-    {
-        runtimes[n]=CalcMatMulTime_ij_opt_MY(&A[0], &B[0], &C[0], N);
-        printf("runtime %lf seconds\n", runtimes[n]);
-        average_runtime += runtimes[n]/NRuns;
+        printf("average runtime ijk %lf seconds\n", average_runtime);
+        printf("---------------------------------\n");
+
+
+        // jik ordering
+        // average_runtime = 0.0;
+        // for(int n=0; n<NRuns; n++)
+        // {
+        //     runtimes[n]=CalcMatMulTime_jik(&A[0], &B[0], &C[0], N);
+        //     printf("runtime %lf seconds\n", runtimes[n]);
+        //     average_runtime += runtimes[n]/NRuns;
+        // }
+
+        // printf("average runtime jik %lf seconds\n", average_runtime);
+        // printf("---------------------------------\n");
+        
+
+        // kij ordering
+        average_runtime = 0.0;
+        for(int n=0; n<NRuns; n++)
+        {
+            runtimes[n]=CalcMatMulTime_kij(&A[0], &B[0], &C[0], N);
+            printf("runtime %lf seconds\n", runtimes[n]);
+            average_runtime += runtimes[n]/NRuns;
+        }
+        printf("average runtime kij %lf seconds\n", average_runtime);
+        printf("---------------------------------\n");
+        
+        // kij ordering naive optimization (useless for -O3)
+        average_runtime = 0.0;
+        for(int n=0; n<NRuns; n++)
+        {
+            runtimes[n]=CalcMatMulTime_kij_opt(&A[0], &B[0], &C[0], N);
+            printf("runtime %lf seconds\n", runtimes[n]);
+            average_runtime += runtimes[n]/NRuns;
+        }
+        printf("average runtime kij opt %lf seconds\n", average_runtime);
+        printf("---------------------------------\n");
+
+        // ikj ordering optimization
+        average_runtime = 0.0;
+        for(int n=0; n<NRuns; n++)
+        {
+            runtimes[n]=CalcMatMulTime_ikj_opt_MY_01(&A[0], &B[0], &C[0], N);
+            printf("runtime %lf seconds\n", runtimes[n]);
+            average_runtime += runtimes[n]/NRuns;
+        }
+        printf("average runtime ikj ordering MY %lf seconds\n", average_runtime);
+        printf("---------------------------------\n");
+
+        // ij ordering optimization
+        average_runtime = 0.0;
+        for(int n=0; n<NRuns; n++)
+        {
+            runtimes[n]=CalcMatMulTime_ij_opt_MY(&A[0], &B[0], &C[0], N);
+            printf("runtime %lf seconds\n", runtimes[n]);
+            average_runtime += runtimes[n]/NRuns;
+        }
+        printf("average runtime ij ordering optimization MY %lf seconds\n", average_runtime);
+        printf("---------------------------------\n");
     }
-    printf("average runtime ij ordering optimization MY %lf seconds\n", average_runtime);
-    printf("---------------------------------\n");
 
     free(A); 
     free(B);
     free(C);
-    return 0;
+    
 }
+
 

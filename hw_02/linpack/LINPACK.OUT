@@ -1,0 +1,40 @@
+Current date/time: Mon Oct  3 10:36:58 2022
+
+CPU frequency:    4.089 GHz
+Number of CPUs: 1
+Number of cores: 6
+Number of threads: 6
+
+Parameters are set to:
+
+Number of tests: 1
+Number of equations to solve (problem size) : 2048 
+Leading dimension of array                  : 2048 
+Number of trials to run                     : 10   
+Data alignment value (in Kbytes)            : 64   
+
+Maximum memory requested that can be used=33660928, at the size=2048
+
+=================== Timing linear equation system solver ===================
+
+Size   LDA    Align. Time(s)    GFlops   Residual     Residual(norm) Check
+2048   2048   64     0.037      154.1878 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.039      148.2651 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.041      140.4709 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.042      138.0199 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.048      120.5015 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.039      145.6773 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.041      141.1029 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.040      141.8962 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.037      154.6955 3.848644e-12 3.164955e-02   pass
+2048   2048   64     0.038      149.3773 3.848644e-12 3.164955e-02   pass
+
+Performance Summary (GFlops)
+
+Size   LDA    Align.  Average  Maximal
+2048   2048   64      143.4195 154.6955
+
+Residual checks PASSED
+
+End of tests
+
