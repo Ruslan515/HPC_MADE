@@ -1,0 +1,1 @@
+mpiexec -n $1 python3 -m mpi4py task_01.py
