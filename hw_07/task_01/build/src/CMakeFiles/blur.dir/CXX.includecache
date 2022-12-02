@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/src/blur/main.cpp
+iostream
+-
+string
+-
+fstream
+-
+limits.h
+-
+unistd.h
+-
+cmath
+-
+map
+-
+main.h
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/src/blur/main.h
+
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/src/blur/main.h
+cstdint
+-
+

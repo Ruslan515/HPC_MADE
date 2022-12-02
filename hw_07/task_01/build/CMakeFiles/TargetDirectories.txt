@@ -1,0 +1,7 @@
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/CMakeFiles/rebuild_cache.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/CMakeFiles/edit_cache.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/CMakeFiles/test.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/src/CMakeFiles/rebuild_cache.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/src/CMakeFiles/edit_cache.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/src/CMakeFiles/test.dir
+/media/ruslan515/DATA_LINUX/ITMO/I_semestr/C++/hw_04_copy/build/src/CMakeFiles/blur.dir
